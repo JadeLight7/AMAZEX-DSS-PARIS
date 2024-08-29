@@ -1,5 +1,6 @@
 ## AMAZEX-DSS-PARIS Operation magic redemption 
-这明明是个很简单的题我却看了很久都没有发现问题，最后看了下攻击原型https://foresightnews.pro/article/detail/32350，才发现问题所在
+这明明是个很简单的题我却看了很久都没有发现问题，最后看了下攻击原型https://foresightnews.pro/article/detail/32350
+，才发现问题所在
 
 具体是`burnFrom`里的`_approve(account, msg.sender, currentAllowance - amount);`前两个参数放反了。于是我们可以先允许exploiter用攻击合约的ether，调用这个函数使amount=0，然后现在这个approve允许攻击合约用exploiter的ether了
 
